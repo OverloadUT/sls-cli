@@ -1,0 +1,47 @@
+{
+  "name": "@spectra/sls",
+  "version": "0.1.0",
+  "description": "Semantic directory listing tool for AI agents - reads front matter from markdown files to provide structure AND meaning",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "sls": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "FRONTMATTER.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node --test tests/unit/**/*.test.js",
+    "test:integration": "node --test tests/integration/**/*.test.js",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "cli",
+    "ls",
+    "semantic",
+    "ai",
+    "markdown",
+    "frontmatter",
+    "directory"
+  ],
+  "author": "Spectra",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "gray-matter": "^4.0.3",
+    "ignore": "^5.3.0",
+    "globby": "^14.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  }
+}
