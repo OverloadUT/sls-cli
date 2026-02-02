@@ -88,13 +88,21 @@ Directives use the `sls:` prefix and control SLS behavior.
 Controls visibility when this directory appears in a parent listing.
 
 ```yaml
-sls:depth: 0  # Just show me, don't list my children
+sls:depth: 0  # Just show me with file count, don't list children
 sls:depth: 1  # Show my immediate children (default)
 sls:depth: 3  # Show three levels deep
 ```
 
+When `sls:depth: 0`, the directory still displays a file count:
+```
+├── memories/
+│   Persistent memories across sessions (47 files)
+```
+
+This provides useful signal ("there are 47 memories") without the token cost of listing them all.
+
 **Use cases:**
-- `memories/` with hundreds of files → `sls:depth: 0` (just show the folder exists)
+- `memories/` with hundreds of files → `sls:depth: 0` (show folder with count)
 - `docs/` with important structure → `sls:depth: 4` (show full documentation tree)
 - Agent workspace → `sls:depth: 2` (show structure but not deep contents)
 
@@ -163,15 +171,14 @@ sls:schema:
             - name: ideas
               type: directory
               description: Ideas and concepts being developed
-              sls:depth: 1
+              sls:depth: 0
 ```
 
 This schema, defined at the guilds level, specifies:
 - Every guild must have an `agents/` directory
 - Every agent workspace defaults to `sls:height: 2` (always shows guild context)
 - Standard files have default descriptions (no front matter needed in individual files)
-- `memories/` defaults to `sls:depth: 0` (folder shown, contents hidden unless explicitly listed)
-- `ideas/` defaults to `sls:depth: 1` (shows idea files with descriptions)
+- `memories/` and `ideas/` default to `sls:depth: 0` (show folder with file count, expand when listed directly)
 
 #### Why schema defaults matter
 
@@ -236,12 +243,12 @@ alice/
 ├── tools.md
 │   Available tools and usage patterns
 ├── memories/
-│   Persistent memories across sessions
+│   Persistent memories across sessions (12 files)
 └── ideas/
-    Ideas and concepts being developed
+    Ideas and concepts being developed (3 files)
 ```
 
-Note: The descriptions for `agent.md`, `tools.md`, `memories/`, and `ideas/` come from schema defaults—no front matter exists in these files.
+Note: The descriptions come from schema defaults. Both `memories/` and `ideas/` show file counts because their schema default is `sls:depth: 0`. Running `sls memories/` would expand to show all 12 files with their descriptions.
 
 ### JSON output
 
@@ -301,6 +308,7 @@ alice/
 │   depth: 0 [schema: guilds/README.md]
 └── ideas/
     Ideas and concepts being developed [schema: guilds/README.md]
+    depth: 0 [schema: guilds/README.md]
 ```
 
 This helps identify:
