@@ -88,13 +88,6 @@ export function formatTree(
   return output;
 }
 
-/**
- * Truncate description for inline display
- */
-function truncateDesc(desc: string, maxLen: number = 50): string {
-  if (desc.length <= maxLen) return desc;
-  return desc.substring(0, maxLen - 3) + '...';
-}
 
 /**
  * Format a single tree node and its children
@@ -114,7 +107,7 @@ function formatTreeNode(
 
     // Add description inline with arrow
     if (entry.description) {
-      nameLine += `  ← ${truncateDesc(entry.description)}`;
+      nameLine += `  ← ${entry.description}`;
       if (audit && (entry as AuditEntry).descriptionSource) {
         nameLine += ` ${formatSource((entry as AuditEntry).descriptionSource!)}`;
       }
@@ -146,7 +139,7 @@ function formatTreeNode(
 
     // Add description inline with arrow
     if (entry.description) {
-      nameLine += `  ← ${truncateDesc(entry.description)}`;
+      nameLine += `  ← ${entry.description}`;
       if (audit && (entry as AuditEntry).descriptionSource) {
         nameLine += ` ${formatSource((entry as AuditEntry).descriptionSource!)}`;
       }

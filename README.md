@@ -1,6 +1,6 @@
-# sls - Semantic Directory Listing CLI
+# sls - Spectra Listing System
 
-A semantic directory listing tool designed for AI agents. Combines filesystem structure with human/AI-authored metadata from markdown front matter to enable one-shot directory understanding.
+A semantic directory listing tool designed for AI agents operating within the Spectra hierarchy. Combines filesystem structure with human/AI-authored metadata from markdown front matter to enable one-shot directory understanding.
 
 ## Why sls?
 
@@ -44,65 +44,50 @@ sls /path/to/directory --human
 # Limit depth
 sls /path/to/directory --depth 2
 
-# Filter by pattern
-sls /path/to/directory --filter "*.md"
+# With height context (requires SPECTRA_ROOT)
+SPECTRA_ROOT=/path/to/root sls /path/to/directory --human
 ```
 
 ## Usage Examples
 
-### Example 1: JSON output (default)
+### Example 1: Human-readable tree (default with --human)
 
 ```bash
-$ sls fixtures/example-workspace
+$ SPECTRA_ROOT=$PWD/fixtures/spectra sls fixtures/spectra/guilds/design-guild --human
+```
+
+Output:
+```
+╭─ Height ─────────────────────────────────────────────╮
+│ guilds/design-guild                                  │
+│                                                      │
+│ guilds: Collection of AI agent guilds                │
+╰──────────────────────────────────────────────────────╯
+
+design-guild/  ← Visual design and branding guild
+├── agents/  ← Design guild agent workspaces
+│   └── ...
+└── workspaces/  ← Code workspaces for design projects
+    └── ...
+```
+
+### Example 2: JSON output (default)
+
+```bash
+$ sls fixtures/spectra
 ```
 
 Output:
 ```json
 {
-  "success": true,
-  "path": "example-workspace",
-  "type": "directory",
-  "description": "Example workspace for testing sls CLI",
-  "tags": ["test", "example"],
-  "modified": "2026-01-27T09:00:00Z",
-  "children": [
-    {
-      "path": "docs",
-      "type": "directory",
-      "description": "Documentation directory",
-      "tags": ["docs"],
-      "modified": "2026-01-27T09:00:00Z",
-      "children": [...]
-    },
-    {
-      "path": "idea.md",
-      "type": "file",
-      "description": "A sample idea document",
-      "tags": ["idea", "test"],
-      "modified": "2026-01-27T09:00:00Z",
-      "size": 128
-    }
-  ]
+  "entry": {
+    "name": "spectra",
+    "type": "directory",
+    "description": "Spectra AI Network root",
+    "modified": "2026-01-27T09:00:00.000Z",
+    "children": [...]
+  }
 }
-```
-
-### Example 2: Human-readable tree
-
-```bash
-$ sls fixtures/example-workspace --human
-```
-
-Output:
-```
-example-workspace/
-│ Example workspace for testing sls CLI
-│
-├─ docs/
-│  └─ Documentation directory
-│     ├─ guide.md
-│     │  └─ User guide
-└─ idea.md
-   └─ A sample idea document
 ```
 
 ### Example 3: Error handling
@@ -116,13 +101,9 @@ Output to stderr:
 {
   "success": false,
   "error": {
-    "code": "INVALID_PATH",
+    "code": "PATH_NOT_FOUND",
     "message": "Path does not exist: /nonexistent/path",
-    "suggestion": "Check the path and try again",
-    "context": {
-      "inputPath": "/nonexistent/path",
-      "resolvedPath": "/nonexistent/path"
-    }
+    "suggestion": "Check that the path exists and try again"
   }
 }
 ```
@@ -146,27 +127,51 @@ sls [path] [options]
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--human` | Output human-readable tree format | false (JSON) |
-| `--depth <number>` | Maximum depth to traverse | 3 |
-| `--no-descriptions` | Show structure only, skip metadata | false |
-| `--filter <pattern>` | Glob pattern to filter results | none |
+| `--json` | Force JSON output | true |
+| `--depth <number>` | Override maximum traversal depth | 3 |
+| `--validate` | Validate structure against schemas | false |
+| `--audit` | Show metadata sources (local vs schema) | false |
+| `--summary` | Include summary fields in output | false |
+| `--no-height` | Omit height context box | false |
 | `--show-ignored` | Show ignored files/directories | false |
 | `--debug` | Enable debug output to stderr | false |
 | `--help` | Show help message | - |
 | `--version` | Show version number | - |
 
-### Front Matter Spec
+## Front Matter
 
-See [FRONTMATTER.md](./FRONTMATTER.md) for the complete front matter specification.
+See [SLS_SPEC.md](./SLS_SPEC.md) for the complete specification.
 
-**Standard fields (no prefix):**
-- `description` - One-line summary
-- `purpose` - Why this exists  
-- `tags` - Array of tags
+**Metadata fields:**
+- `description` - One-line summary (max 1024 chars)
+- `summary` - Extended explanation (optional)
 
-**Tool directives (sls: prefix):**
-- `sls:depth` - Always list N levels deep from this directory
-- `sls:context` - Include parent/sibling context file
-- `sls:ignore` - Skip this directory/file
+**Directives (sls: prefix):**
+- `sls:depth` - How deep to show contents when listed from above
+- `sls:height` - How many ancestry levels to show when listing here
+- `sls:ignore` - Exclude from listings
+- `sls:schema` - Define required structure and defaults for children
+
+## Schemas
+
+Schemas define required structure and default metadata for child entries. They're defined in front matter and inherited by descendants.
+
+```yaml
+---
+sls:schema:
+  children:
+    - name: agents
+      type: directory
+      required: true
+      description: Guild member agent workspaces
+      children:
+        - pattern: "*"
+          type: directory
+          sls:height: 2
+---
+```
+
+Schema defaults are used when entries don't have their own front matter, ensuring consistency across the hierarchy.
 
 ## Exit Codes
 
@@ -174,8 +179,7 @@ See [FRONTMATTER.md](./FRONTMATTER.md) for the complete front matter specificati
 |------|---------|
 | 0 | Success |
 | 1 | General error (invalid input, operation failed) |
-| 2 | Invalid usage (missing arguments, unknown command) |
-| 3 | Permission denied or safety check failed |
+| 3 | Permission denied |
 | 4 | Not found (path doesn't exist) |
 
 ## Error Codes
@@ -184,27 +188,10 @@ All errors are output as structured JSON to stderr.
 
 | Code | Description | Exit Code |
 |------|-------------|-----------|
-| `INVALID_PATH` | Path doesn't exist or is inaccessible | 4 |
+| `PATH_NOT_FOUND` | Path doesn't exist or is inaccessible | 4 |
 | `INVALID_DEPTH` | Depth must be between 1 and 10 | 1 |
 | `PARSE_ERROR` | Front matter parsing failed (gracefully degrades) | 1 |
 | `PERMISSION_DENIED` | Cannot read directory/file | 3 |
-| `INVALID_FILTER` | Glob pattern syntax error | 1 |
-
-## JSON Output Schema
-
-```typescript
-{
-  success: true,
-  path: string,              // Entry path
-  type: 'directory' | 'file',
-  description?: string,      // From front matter
-  purpose?: string,          // From front matter
-  tags?: string[],           // From front matter
-  modified: string,          // ISO 8601 timestamp
-  size?: number,             // Bytes (files only)
-  children?: DirectoryEntry[] // Directories only
-}
-```
 
 ## Development
 
@@ -249,6 +236,8 @@ sls/
 │   ├── lib/
 │   │   ├── frontmatter.ts    # YAML front matter parser
 │   │   ├── traverse.ts       # Directory traversal
+│   │   ├── schema.ts         # Schema resolution and validation
+│   │   ├── height.ts         # Height/ancestry context
 │   │   ├── ignore.ts         # .gitignore/.slsignore handling
 │   │   ├── output.ts         # JSON/tree formatting
 │   │   ├── errors.ts         # Error types and codes
@@ -256,7 +245,7 @@ sls/
 │   └── types.ts              # Global types
 ├── tests/
 │   ├── unit/                 # Unit tests
-│   └── integration/          # Integration smoke tests
+│   └── integration/          # Integration tests
 ├── fixtures/                 # Test fixtures
 └── dist/                     # Compiled output
 ```
@@ -265,8 +254,8 @@ sls/
 
 - **Read-only**: Never writes files or makes destructive changes
 - **Path validation**: Prevents directory traversal attacks
-- **File size limits**: Skips files >1MB for front matter parsing
-- **Depth limits**: Maximum depth of 10 (default 3) prevents infinite recursion
+- **File size limits**: Skips files >5KB for front matter parsing
+- **Depth limits**: Maximum depth of 10 (default 3)
 - **Symlink safety**: Detects and handles symlink loops
 - **Graceful degradation**: Continues on parse errors, logs to stderr
 
@@ -278,22 +267,11 @@ sls/
 - Always ignores: `.git/`, `node_modules/`, `.DS_Store`
 - Use `--show-ignored` to see ignored files
 
-## Use Cases
+## Environment Variables
 
-### AI Agents
-- Explore unfamiliar codebases in one command
-- Understand directory purpose without reading multiple files
-- Efficient token usage (structure + metadata in single response)
-
-### Human Developers
-- Quick overview of project structure
-- Discover documentation and purpose of directories
-- Navigate large repositories efficiently
-
-### Documentation
-- Generate directory maps for documentation
-- Validate front matter consistency
-- Audit project organization
+| Variable | Description |
+|----------|-------------|
+| `SPECTRA_ROOT` | Root of the Spectra hierarchy. Enables height context and full path resolution. |
 
 ## License
 
@@ -305,6 +283,6 @@ Spectra
 
 ---
 
-**Version**: 0.1.0  
-**Node.js**: >=18.0.0  
+**Version**: 0.1.0
+**Node.js**: >=18.0.0
 **Type**: ESM (module)

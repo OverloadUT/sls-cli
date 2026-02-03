@@ -1,7 +1,7 @@
 {
   "name": "@spectra/sls",
   "version": "0.1.0",
-  "description": "Semantic directory listing tool for AI agents - reads front matter from markdown files to provide structure AND meaning",
+  "description": "Spectra Listing System - semantic directory listing for AI agents in the Spectra hierarchy",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "FRONTMATTER.md"
+    "SLS_SPEC.md"
   ],
   "scripts": {
     "build": "tsc",
