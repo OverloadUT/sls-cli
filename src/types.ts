@@ -1,40 +1,79 @@
 /**
- * Global type definitions for sls CLI
+ * Global type definitions for SLS CLI
  */
 
-/** Directory or file entry with metadata */
-export interface DirectoryEntry {
-  path: string;
-  type: 'file' | 'directory';
+// ============================================================================
+// Schema Types
+// ============================================================================
+
+/** Schema child definition - can match by name or pattern */
+export interface SchemaChild {
+  name?: string;
+  pattern?: string;
+  type?: 'file' | 'directory';
+  required?: boolean;
   description?: string;
-  purpose?: string;
-  tags?: string[];
-  modified: string; // ISO 8601 timestamp
-  size?: number; // Bytes (files only)
-  children?: DirectoryEntry[]; // Directories only
+  'sls:depth'?: number;
+  'sls:height'?: number;
+  children?: SchemaChild[];
 }
+
+/** Schema definition from front matter */
+export interface Schema {
+  children: SchemaChild[];
+}
+
+// ============================================================================
+// Front Matter Types
+// ============================================================================
 
 /** Front matter from README.md or markdown files */
 export interface FrontMatter {
   description?: string;
-  purpose?: string;
-  tags?: string[];
+  summary?: string;
   'sls:depth'?: number;
-  'sls:context'?: string;
+  'sls:height'?: number;
   'sls:ignore'?: boolean;
+  'sls:schema'?: Schema;
 }
 
-/** Success output */
-export interface SuccessOutput {
-  success: true;
-  path: string;
-  type: 'directory' | 'file';
+// ============================================================================
+// Height / Ancestry Types
+// ============================================================================
+
+/** Single ancestor in the height context */
+export interface Ancestor {
+  name: string;
   description?: string;
-  purpose?: string;
-  tags?: string[];
+}
+
+/** Height context showing path and ancestry */
+export interface HeightContext {
+  path: string;
+  ancestors: Ancestor[];
+}
+
+// ============================================================================
+// Output Entry Types
+// ============================================================================
+
+/** Directory or file entry with metadata */
+export interface OutputEntry {
+  name: string;
+  type: 'file' | 'directory';
+  description?: string;
+  summary?: string;
   modified: string;
   size?: number;
-  children?: DirectoryEntry[];
+  fileCount?: number;
+  truncated?: boolean;  // true when children not shown due to depth limit
+  children?: OutputEntry[];
+}
+
+/** Success output with optional height context */
+export interface SuccessOutput {
+  height?: HeightContext;
+  entry: OutputEntry;
 }
 
 /** Error output */
@@ -48,12 +87,55 @@ export interface ErrorOutput {
   };
 }
 
+// ============================================================================
+// Audit Types
+// ============================================================================
+
+/** Source of a metadata value */
+export type MetadataSource =
+  | { type: 'local' }
+  | { type: 'schema'; path: string }
+  | { type: 'default' };
+
+/** Entry with audit information about metadata sources */
+export interface AuditEntry extends OutputEntry {
+  descriptionSource?: MetadataSource;
+  depthSource?: MetadataSource;
+  heightSource?: MetadataSource;
+}
+
+// ============================================================================
+// Validation Types
+// ============================================================================
+
+/** Single validation result */
+export interface ValidationResult {
+  path: string;
+  schemaPath: string;
+  required: boolean;
+  exists: boolean;
+}
+
+/** Validation summary */
+export interface ValidationSummary {
+  results: ValidationResult[];
+  passed: number;
+  failed: number;
+}
+
+// ============================================================================
+// CLI Types
+// ============================================================================
+
 /** CLI options */
 export interface CLIOptions {
   human?: boolean;
+  json?: boolean;
   depth?: number;
-  noDescriptions?: boolean;
-  filter?: string;
+  validate?: boolean;
+  audit?: boolean;
+  summary?: boolean;
+  height?: boolean;  // false when --no-height is used
   showIgnored?: boolean;
   debug?: boolean;
 }
@@ -65,4 +147,28 @@ export enum ErrorCode {
   PARSE_ERROR = 'PARSE_ERROR',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
   INVALID_FILTER = 'INVALID_FILTER',
+  VALIDATION_FAILED = 'VALIDATION_FAILED',
+}
+
+// ============================================================================
+// Internal Types (used during traversal)
+// ============================================================================
+
+/** Resolved defaults from schema chain */
+export interface ResolvedDefaults {
+  description?: string;
+  depth?: number;
+  height?: number;
+  source?: {
+    description?: MetadataSource;
+    depth?: MetadataSource;
+    height?: MetadataSource;
+  };
+}
+
+/** Context passed through traversal */
+export interface TraversalContext {
+  spectraRoot: string | null;
+  options: CLIOptions;
+  schemaChain: Array<{ path: string; schema: Schema }>;
 }

@@ -14,6 +14,7 @@ const DEFAULT_IGNORES = [
   '.DS_Store',
   '*.swp',
   '*.swo',
+  '.slsignore',
 ];
 
 /**
