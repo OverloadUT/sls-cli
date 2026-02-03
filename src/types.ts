@@ -67,6 +67,7 @@ export interface OutputEntry {
   size?: number;
   fileCount?: number;
   truncated?: boolean;  // true when children not shown due to depth limit
+  truncatedCount?: number;  // number of children omitted when truncated
   children?: OutputEntry[];
 }
 
@@ -129,14 +130,13 @@ export interface ValidationSummary {
 
 /** CLI options */
 export interface CLIOptions {
-  human?: boolean;
   json?: boolean;
   depth?: number;
   validate?: boolean;
   audit?: boolean;
   summary?: boolean;
   height?: boolean;  // false when --no-height is used
-  showIgnored?: boolean;
+  all?: boolean;  // show hidden and ignored files
   debug?: boolean;
 }
 

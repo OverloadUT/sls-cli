@@ -9,20 +9,42 @@ import { parseFrontMatter } from './frontmatter.js';
 import { resolveDefaults } from './schema.js';
 
 /**
- * Get SPECTRA_ROOT from environment
+ * Get SPECTRA_ROOT from environment, or auto-detect from query path
+ * Auto-detection walks up from the query path looking for a README.md with sls:schema
  */
-export function getSpectraRoot(): string | null {
-  const root = process.env.SPECTRA_ROOT;
-  if (!root) {
-    return null;
+export function getSpectraRoot(queryPath?: string): string | null {
+  // First check environment variable
+  const envRoot = process.env.SPECTRA_ROOT;
+  if (envRoot) {
+    const resolved = path.resolve(envRoot);
+    if (fs.existsSync(resolved)) {
+      return resolved;
+    }
   }
 
-  const resolved = path.resolve(root);
-  if (!fs.existsSync(resolved)) {
-    return null;
+  // Auto-detect by walking up from query path
+  if (queryPath) {
+    let currentPath = path.resolve(queryPath);
+
+    // If queryPath is a file, start from its directory
+    if (fs.existsSync(currentPath) && fs.statSync(currentPath).isFile()) {
+      currentPath = path.dirname(currentPath);
+    }
+
+    while (currentPath !== path.dirname(currentPath)) {
+      const readmePath = path.join(currentPath, 'README.md');
+      if (fs.existsSync(readmePath)) {
+        const fm = parseFrontMatter(readmePath);
+        if (fm['sls:schema']) {
+          // Found a directory with a schema - use this as root
+          return currentPath;
+        }
+      }
+      currentPath = path.dirname(currentPath);
+    }
   }
 
-  return resolved;
+  return null;
 }
 
 /**

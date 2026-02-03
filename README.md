@@ -134,6 +134,7 @@ sls [path] [options]
 | `--summary` | Include summary fields in output | false |
 | `--no-height` | Omit height context box | false |
 | `--show-ignored` | Show ignored files/directories | false |
+| `--spec` | Output the full SLS specification | - |
 | `--debug` | Enable debug output to stderr | false |
 | `--help` | Show help message | - |
 | `--version` | Show version number | - |

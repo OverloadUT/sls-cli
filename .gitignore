@@ -6,3 +6,6 @@ dist/
 *.swo
 .env
 .env.local
+
+# Generated at build time
+src/lib/spec.ts

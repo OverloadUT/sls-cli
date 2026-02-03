@@ -29,8 +29,8 @@ export async function listCommand(targetPath: string, options: ListCommandOption
       validateDepth(options.depth);
     }
 
-    // Get SPECTRA_ROOT
-    const spectraRoot = getSpectraRoot();
+    // Get SPECTRA_ROOT (from env var or auto-detect from query path)
+    const spectraRoot = getSpectraRoot(resolvedPath);
 
     // Handle validation mode
     if (options.validate) {
@@ -48,13 +48,12 @@ export async function listCommand(targetPath: string, options: ListCommandOption
 
     // Convert options to CLI options
     const cliOptions: CLIOptions = {
-      human: options.human,
       json: options.json,
       depth: options.depth,
       audit: options.audit,
       summary: options.summary,
       height: options.height,
-      showIgnored: options.showIgnored,
+      all: options.all,
       debug: options.debug,
     };
 
@@ -74,14 +73,11 @@ export async function listCommand(targetPath: string, options: ListCommandOption
       }
     }
 
-    // Format and output
-    // Default to human-readable for TTY, JSON otherwise
-    const useHuman = options.human || (!options.json && process.stdout.isTTY);
-
-    if (useHuman) {
-      console.log(formatTree(entry, heightContext || undefined, options.audit));
-    } else {
+    // Format and output (tree is default, --json for JSON)
+    if (options.json) {
       console.log(formatJSON(entry, heightContext || undefined));
+    } else {
+      console.log(formatTree(entry, heightContext || undefined, options.audit));
     }
 
     process.exit(0);

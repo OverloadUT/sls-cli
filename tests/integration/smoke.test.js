@@ -51,7 +51,7 @@ test('CLI outputs valid JSON', async () => {
 });
 
 test('CLI outputs human-readable tree', async () => {
-  const { stdout } = await execAsync(`node ${CLI_PATH} ${FIXTURES_PATH} --human`);
+  const { stdout } = await execAsync(`node ${CLI_PATH} ${FIXTURES_PATH}`);
 
   assert(stdout.includes('spectra/'));
   assert(stdout.includes('├──') || stdout.includes('└──'));
@@ -60,7 +60,7 @@ test('CLI outputs human-readable tree', async () => {
 test('CLI includes height context with SPECTRA_ROOT', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --human`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   assert(stdout.includes('╭─ Height'));
@@ -71,7 +71,7 @@ test('CLI includes height context with SPECTRA_ROOT', async () => {
 test('CLI applies schema defaults', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --human`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   // agent.md should have schema default description
@@ -81,17 +81,17 @@ test('CLI applies schema defaults', async () => {
 test('CLI shows file counts for depth-0 folders', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --human`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   // memories should show file count
-  assert(stdout.includes('(3 files)'));
+  assert(stdout.includes('(3 items)'));
 });
 
 test('CLI expands depth-0 folder when listed directly', async () => {
   const memoriesPath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice/memories');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${memoriesPath} --human`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${memoriesPath}`
   );
 
   // Should show individual files
@@ -111,7 +111,7 @@ test('CLI validates structure successfully', async () => {
 test('CLI shows audit information', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --audit --human`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --audit`
   );
 
   assert(stdout.includes('[local]'));
@@ -134,7 +134,7 @@ test('CLI handles invalid path with structured error', async () => {
 
 test('CLI respects --depth option', async () => {
   const { stdout } = await execAsync(
-    `node ${CLI_PATH} ${FIXTURES_PATH} --human --depth 1`
+    `node ${CLI_PATH} ${FIXTURES_PATH} --depth 1`
   );
 
   // Should show guilds but not contents
@@ -158,7 +158,7 @@ test('CLI JSON includes height context', async () => {
 test('CLI respects --no-height option', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --human --no-height`
+    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --no-height`
   );
 
   // Should NOT include height box
@@ -166,7 +166,7 @@ test('CLI respects --no-height option', async () => {
 });
 
 test('CLI respects ignore rules', async () => {
-  const { stdout } = await execAsync(`node ${CLI_PATH} ${FIXTURES_PATH} --human`);
+  const { stdout } = await execAsync(`node ${CLI_PATH} ${FIXTURES_PATH}`);
 
   // ignored-folder should not appear
   assert(!stdout.includes('ignored-folder'));

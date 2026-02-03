@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { OutputEntry, CLIOptions, AuditEntry, MetadataSource } from '../types.js';
 import { parseFrontMatter } from './frontmatter.js';
-import { createIgnoreFilter } from './ignore.js';
+import { createIgnoreFilter, isHidden } from './ignore.js';
 import { resolveDefaults } from './schema.js';
 
 interface TraverseOptions {
@@ -16,15 +16,21 @@ interface TraverseOptions {
 }
 
 /**
- * Count files in a directory (non-recursive, excluding README.md)
+ * Count items in a directory (non-recursive, excluding README.md and hidden files)
+ * Returns { files, directories, total }
  */
-function countFiles(dirPath: string): number {
+function countItems(dirPath: string, spectraRoot: string | null, showAll: boolean = false): { files: number; directories: number; total: number } {
   try {
     const items = fs.readdirSync(dirPath);
-    const ig = createIgnoreFilter(dirPath);
+    const ig = createIgnoreFilter(dirPath, spectraRoot || undefined);
 
-    let count = 0;
+    let files = 0;
+    let directories = 0;
+
     for (const item of items) {
+      // Skip hidden files unless showAll
+      if (isHidden(item) && !showAll) continue;
+
       // Skip ignored items
       if (ig.ignores(item)) continue;
 
@@ -35,13 +41,15 @@ function countFiles(dirPath: string): number {
       const stats = fs.statSync(itemPath);
 
       if (stats.isFile()) {
-        count++;
+        files++;
+      } else if (stats.isDirectory()) {
+        directories++;
       }
     }
 
-    return count;
+    return { files, directories, total: files + directories };
   } catch {
-    return 0;
+    return { files: 0, directories: 0, total: 0 };
   }
 }
 
@@ -172,27 +180,36 @@ export async function traverseDirectory(
 
   // Determine effective max depth for this subtree
   // - CLI depth option (if specified) sets initial max
-  // - Local or schema sls:depth can override for subtree
+  // - Local or schema sls:depth can OVERRIDE inherited limits (but only when not at root)
   let maxDepth = effectiveMaxDepth;
   if (maxDepth === null) {
     maxDepth = cliOptions.depth ?? 3;
   }
 
-  // If this directory has its own depth setting, use it for children
-  const subtreeMaxDepth = localDepth !== undefined ? currentDepth + localDepth : maxDepth;
-
   // Check if we should stop here (depth 0 means just show this directory with count)
   // But if this is the root of the query (currentDepth === 0), always show contents
   if (localDepth === 0 && currentDepth > 0) {
-    const fileCount = countFiles(dirPath);
-    entry.fileCount = fileCount;
+    const counts = countItems(dirPath, spectraRoot, cliOptions.all);
+    entry.fileCount = counts.total;
     return entry;
   }
 
+  // If this directory has its own depth setting, it overrides the inherited limit
+  // This allows nested directories to expand beyond their parent's depth
+  // Only apply when not at the root query level (currentDepth > 0) OR when depth > 0
+  if (localDepth !== undefined && (currentDepth > 0 || localDepth > 0)) {
+    maxDepth = currentDepth + localDepth;
+  }
+
+  // For children, pass down this calculated max depth
+  const subtreeMaxDepth = maxDepth;
+
   // Check depth limit
   if (currentDepth >= maxDepth) {
-    // Mark as truncated so output can show there's more content
+    // Mark as truncated with count of omitted items
+    const counts = countItems(dirPath, spectraRoot, cliOptions.all);
     entry.truncated = true;
+    entry.truncatedCount = counts.total;
     return entry;
   }
 
@@ -201,16 +218,21 @@ export async function traverseDirectory(
 
   try {
     const items = fs.readdirSync(dirPath);
-    const ig = createIgnoreFilter(dirPath);
+    const ig = createIgnoreFilter(dirPath, spectraRoot || undefined);
 
     for (const item of items) {
       // Skip README.md in listings (it's metadata)
       if (item === 'README.md') continue;
 
+      // Skip hidden files (starting with .) unless --all is used
+      if (isHidden(item) && !cliOptions.all) {
+        continue;
+      }
+
       const itemPath = path.join(dirPath, item);
 
       // Check if should be ignored
-      if (ig.ignores(item) && !cliOptions.showIgnored) {
+      if (ig.ignores(item) && !cliOptions.all) {
         continue;
       }
 

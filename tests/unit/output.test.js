@@ -141,7 +141,7 @@ test('formatTree shows file counts', () => {
 
   const result = formatTree(entry);
 
-  assert(result.includes('(3 files)'));
+  assert(result.includes('(3 items)'));
 });
 
 test('formatTree shows audit sources', () => {

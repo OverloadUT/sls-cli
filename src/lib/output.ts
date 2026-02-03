@@ -113,20 +113,17 @@ function formatTreeNode(
       }
     }
 
-    // Add file count for collapsed dirs
+    // Add file count for collapsed dirs (either sls:depth:0 or truncated)
     if (entry.fileCount !== undefined) {
-      nameLine += ` (${entry.fileCount} file${entry.fileCount === 1 ? '' : 's'})`;
+      nameLine += ` (${entry.fileCount} item${entry.fileCount === 1 ? '' : 's'})`;
+    } else if (entry.truncated && (entry as OutputEntry).truncatedCount !== undefined) {
+      nameLine += ` (${(entry as OutputEntry).truncatedCount} item${(entry as OutputEntry).truncatedCount === 1 ? '' : 's'})`;
     }
 
     output += nameLine + '\n';
 
     if (audit && (entry as AuditEntry).depthSource) {
       output += `│ depth: ${formatSource((entry as AuditEntry).depthSource!)}\n`;
-    }
-
-    // Show truncation indicator if truncated at root level
-    if (entry.truncated) {
-      output += `└── ...\n`;
     }
   } else {
     // Child entry
@@ -145,9 +142,11 @@ function formatTreeNode(
       }
     }
 
-    // Add file count for collapsed dirs
+    // Add item count for collapsed dirs (either sls:depth:0 or truncated)
     if (entry.fileCount !== undefined) {
-      nameLine += ` (${entry.fileCount} file${entry.fileCount === 1 ? '' : 's'})`;
+      nameLine += ` (${entry.fileCount} item${entry.fileCount === 1 ? '' : 's'})`;
+    } else if (entry.truncated && (entry as OutputEntry).truncatedCount !== undefined) {
+      nameLine += ` (${(entry as OutputEntry).truncatedCount} item${(entry as OutputEntry).truncatedCount === 1 ? '' : 's'})`;
     }
 
     output += nameLine + '\n';
@@ -156,11 +155,6 @@ function formatTreeNode(
 
     if (audit && (entry as AuditEntry).depthSource) {
       output += `${childPrefix}depth: ${formatSource((entry as AuditEntry).depthSource!)}\n`;
-    }
-
-    // Show truncation indicator for directories that have more content
-    if (entry.type === 'directory' && entry.truncated) {
-      output += `${childPrefix}└── ...\n`;
     }
   }
 

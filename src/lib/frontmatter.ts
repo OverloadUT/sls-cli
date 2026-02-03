@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { FrontMatter, Schema, SchemaChild } from '../types.js';
 
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB
-const MAX_READ_SIZE = 5 * 1024; // Read only first 5KB for front matter
+const MAX_READ_SIZE = 64 * 1024; // Read first 64KB for front matter (schemas can be large)
 
 /**
  * Parse schema child from raw data
