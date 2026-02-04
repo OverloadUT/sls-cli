@@ -1,6 +1,6 @@
 {
   "name": "@spectra/sls",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Spectra Listing System - semantic directory listing for AI agents in the Spectra hierarchy",
   "type": "module",
   "main": "dist/index.js",
