@@ -18,7 +18,7 @@ npm run test:unit    # Run unit tests only
 npm run test:integration  # Run integration tests only
 
 sls --help           # Verify installation, show CLI options
-SPECTRA_ROOT=$PWD/fixtures/spectra sls fixtures/spectra --human  # Test with fixtures
+SPECTRA_WORKSPACE=$PWD/fixtures/spectra sls fixtures/spectra --human  # Test with fixtures
 ```
 
 Tests use Node.js built-in test runner (`node --test`) and are located in `tests/unit/` and `tests/integration/`.
@@ -33,7 +33,7 @@ Tests use Node.js built-in test runner (`node --test`) and are located in `tests
 **Key Libraries:**
 - `src/lib/frontmatter.ts` - Parses YAML front matter from markdown files using `gray-matter`
 - `src/lib/schema.ts` - Schema resolution, matching, and validation
-- `src/lib/height.ts` - Height/ancestry context handling with SPECTRA_ROOT
+- `src/lib/height.ts` - Height/ancestry context handling with SPECTRA_WORKSPACE
 - `src/lib/ignore.ts` - Handles `.gitignore` and `.slsignore` filtering using `ignore` package
 - `src/lib/output.ts` - Formats output as JSON or human-readable tree
 - `src/lib/errors.ts` - Structured error output with `SLSError` class

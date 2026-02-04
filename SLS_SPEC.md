@@ -14,7 +14,7 @@ SLS enables AI agents to understand filesystem structure and context in a single
 
 ## Environment
 
-SLS operates within a Spectra workspace. The `SPECTRA_ROOT` environment variable defines the root of the hierarchy. This enables SLS to:
+SLS operates within a Spectra workspace. The `SPECTRA_WORKSPACE` environment variable defines the root of the hierarchy. This enables SLS to:
 
 - Always know the full path context
 - Orient agents within the hierarchy regardless of working directory
@@ -115,7 +115,7 @@ sls:height: 2  # Show 2 levels of parent context
 ```
 
 When an agent runs `sls` from a directory with `sls:height: 2`, the output includes:
-- The path from SPECTRA_ROOT to current location
+- The path from SPECTRA_WORKSPACE to current location
 - Descriptions of the 2 immediate parent directories
 
 This orients the agent within the hierarchy without requiring additional commands.
@@ -373,4 +373,4 @@ This eliminates exploratory commands at session start and ensures every agent se
 | Schema defaults | Descriptions, depth, height inherited from schema unless overridden |
 | Height box | Orient agent within hierarchy |
 | Audit mode | Show where metadata values originate |
-| SPECTRA_ROOT | Anchor for full path resolution |
+| SPECTRA_WORKSPACE | Anchor for full path resolution |

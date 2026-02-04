@@ -3,7 +3,7 @@ description: Spectra AI Network root
 summary: |
   The root of the Spectra AI hierarchy containing all guilds,
   agents, and their associated workspaces. This is the anchor
-  point for SPECTRA_ROOT.
+  point for SPECTRA_WORKSPACE.
 sls:schema:
   children:
     - name: guilds

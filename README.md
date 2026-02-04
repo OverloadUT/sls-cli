@@ -44,8 +44,8 @@ sls /path/to/directory --human
 # Limit depth
 sls /path/to/directory --depth 2
 
-# With height context (requires SPECTRA_ROOT)
-SPECTRA_ROOT=/path/to/root sls /path/to/directory --human
+# With height context (requires SPECTRA_WORKSPACE)
+SPECTRA_WORKSPACE=/path/to/root sls /path/to/directory --human
 ```
 
 ## Usage Examples
@@ -53,7 +53,7 @@ SPECTRA_ROOT=/path/to/root sls /path/to/directory --human
 ### Example 1: Human-readable tree (default with --human)
 
 ```bash
-$ SPECTRA_ROOT=$PWD/fixtures/spectra sls fixtures/spectra/guilds/design-guild --human
+$ SPECTRA_WORKSPACE=$PWD/fixtures/spectra sls fixtures/spectra/guilds/design-guild --human
 ```
 
 Output:
@@ -272,7 +272,7 @@ sls/
 
 | Variable | Description |
 |----------|-------------|
-| `SPECTRA_ROOT` | Root of the Spectra hierarchy. Enables height context and full path resolution. |
+| `SPECTRA_WORKSPACE` | Root of the Spectra hierarchy. Enables height context and full path resolution. |
 
 ## License
 

@@ -29,7 +29,7 @@ export async function listCommand(targetPath: string, options: ListCommandOption
       validateDepth(options.depth);
     }
 
-    // Get SPECTRA_ROOT (from env var or auto-detect from query path)
+    // Get SPECTRA_WORKSPACE (from env var or auto-detect from query path)
     const spectraRoot = getSpectraRoot(resolvedPath);
 
     // Handle validation mode

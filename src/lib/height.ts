@@ -9,12 +9,12 @@ import { parseFrontMatter } from './frontmatter.js';
 import { resolveDefaults } from './schema.js';
 
 /**
- * Get SPECTRA_ROOT from environment, or auto-detect from query path
+ * Get SPECTRA_WORKSPACE from environment, or auto-detect from query path
  * Auto-detection walks up from the query path looking for a README.md with sls:schema
  */
 export function getSpectraRoot(queryPath?: string): string | null {
   // First check environment variable
-  const envRoot = process.env.SPECTRA_ROOT;
+  const envRoot = process.env.SPECTRA_WORKSPACE;
   if (envRoot) {
     const resolved = path.resolve(envRoot);
     if (fs.existsSync(resolved)) {
@@ -86,7 +86,7 @@ export function getAncestorDescription(
  *
  * @param entryPath - Absolute path to the entry
  * @param heightLevels - Number of ancestor levels to include
- * @param spectraRoot - SPECTRA_ROOT path (optional)
+ * @param spectraRoot - SPECTRA_WORKSPACE path (optional)
  * @returns HeightContext or null if no context available
  */
 export function buildHeightContext(
@@ -108,7 +108,7 @@ export function buildHeightContext(
   // Get relative path from root
   const relPath = path.relative(normalizedRoot, normalizedEntry);
   if (relPath.startsWith('..')) {
-    // Entry is outside SPECTRA_ROOT
+    // Entry is outside SPECTRA_WORKSPACE
     return null;
   }
 

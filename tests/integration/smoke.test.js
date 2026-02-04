@@ -29,16 +29,8 @@ test('CLI shows help', async () => {
 });
 
 test('CLI shows version', async () => {
-  try {
-    const { stdout } = await execAsync(`node ${CLI_PATH} --version`);
-    assert(stdout.includes('0.2'));
-  } catch (error) {
-    if (error.stdout) {
-      assert(error.stdout.includes('0.2'));
-    } else {
-      throw error;
-    }
-  }
+  const { stdout } = await execAsync(`node ${CLI_PATH} --version`);
+  assert(/^\d+\.\d+\.\d+/.test(stdout.trim()), 'Expected semver format');
 });
 
 test('CLI outputs valid JSON', async () => {
@@ -57,10 +49,10 @@ test('CLI outputs human-readable tree', async () => {
   assert(stdout.includes('├──') || stdout.includes('└──'));
 });
 
-test('CLI includes height context with SPECTRA_ROOT', async () => {
+test('CLI includes height context with SPECTRA_WORKSPACE', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   assert(stdout.includes('╭─ Height'));
@@ -71,7 +63,7 @@ test('CLI includes height context with SPECTRA_ROOT', async () => {
 test('CLI applies schema defaults', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   // agent.md should have schema default description
@@ -81,7 +73,7 @@ test('CLI applies schema defaults', async () => {
 test('CLI shows file counts for depth-0 folders', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath}`
   );
 
   // memories should show file count
@@ -91,7 +83,7 @@ test('CLI shows file counts for depth-0 folders', async () => {
 test('CLI expands depth-0 folder when listed directly', async () => {
   const memoriesPath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice/memories');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${memoriesPath}`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${memoriesPath}`
   );
 
   // Should show individual files
@@ -101,7 +93,7 @@ test('CLI expands depth-0 folder when listed directly', async () => {
 
 test('CLI validates structure successfully', async () => {
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${FIXTURES_PATH} --validate`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${FIXTURES_PATH} --validate`
   );
 
   assert(stdout.includes('Validation passed'));
@@ -111,7 +103,7 @@ test('CLI validates structure successfully', async () => {
 test('CLI shows audit information', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --audit`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --audit`
   );
 
   assert(stdout.includes('[local]'));
@@ -146,7 +138,7 @@ test('CLI respects --depth option', async () => {
 test('CLI JSON includes height context', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --json`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --json`
   );
 
   const parsed = JSON.parse(stdout);
@@ -158,7 +150,7 @@ test('CLI JSON includes height context', async () => {
 test('CLI respects --no-height option', async () => {
   const alicePath = path.join(FIXTURES_PATH, 'guilds/design-guild/agents/alice');
   const { stdout } = await execAsync(
-    `SPECTRA_ROOT="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --no-height`
+    `SPECTRA_WORKSPACE="${FIXTURES_PATH}" node ${CLI_PATH} ${alicePath} --no-height`
   );
 
   // Should NOT include height box

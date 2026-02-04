@@ -18,19 +18,19 @@ const __dirname = path.dirname(__filename);
 const fixturesPath = path.join(__dirname, '../../fixtures/spectra');
 
 test('getSpectraRoot returns null when not set', () => {
-  const originalRoot = process.env.SPECTRA_ROOT;
-  delete process.env.SPECTRA_ROOT;
+  const originalRoot = process.env.SPECTRA_WORKSPACE;
+  delete process.env.SPECTRA_WORKSPACE;
 
   const root = getSpectraRoot();
   assert.strictEqual(root, null);
 
   // Restore
-  if (originalRoot) process.env.SPECTRA_ROOT = originalRoot;
+  if (originalRoot) process.env.SPECTRA_WORKSPACE = originalRoot;
 });
 
 test('getSpectraRoot returns path when set', () => {
-  const originalRoot = process.env.SPECTRA_ROOT;
-  process.env.SPECTRA_ROOT = fixturesPath;
+  const originalRoot = process.env.SPECTRA_WORKSPACE;
+  process.env.SPECTRA_WORKSPACE = fixturesPath;
 
   const root = getSpectraRoot();
   assert(root);
@@ -38,9 +38,9 @@ test('getSpectraRoot returns path when set', () => {
 
   // Restore
   if (originalRoot) {
-    process.env.SPECTRA_ROOT = originalRoot;
+    process.env.SPECTRA_WORKSPACE = originalRoot;
   } else {
-    delete process.env.SPECTRA_ROOT;
+    delete process.env.SPECTRA_WORKSPACE;
   }
 });
 
